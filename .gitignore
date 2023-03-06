@@ -16,6 +16,6 @@ venv/
 ./debug.log
 
 # python cache
-__pycache/
+__pycache__/
 *pyc
 
