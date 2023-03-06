@@ -11,3 +11,11 @@ data/cover_letter.txt
 # python venv
 ./venv/
 venv/
+
+# debug data
+./debug.log
+
+# python cache
+__pycache/
+*pyc
+
