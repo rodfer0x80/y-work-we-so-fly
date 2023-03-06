@@ -1,47 +1,49 @@
 import logging
 
 class Logger:
-    def __init__(self, filename="", level="DEBUG"):
-        if empty(filename):
-            logging.basicConfig(level=logging.f"{level}")
+    def __init__(self, filename=""):
+        if not filename:
+            logging.basicConfig(level=logging.DEBUG)
         else:
             logging.basicConfig(
-                    level=logging.f"{level}",
-                    format="%(asctime)s %(levelname)s %(message)s"
-                    datefmt="%Y-%m-%d %H:%M:%S"
+                    level=logging.DEBUG,
+                    format="%(asctime)s %(levelname)s %(message)s",
+                    datefmt="%Y-%m-%d %H:%M:%S",
                     filename=filename
             )
-    def debug(msg: str) -> bool:
+
+    def debug(self, msg: str) -> int:
         try: 
             logging.debug(f"{msg}")
-            return True
+            return 0
         except:
-            return False
+            return 1
     
-    def info(msg: str) -> bool:
+    def info(self, msg: str) -> int:
         try: 
             logging.info(f"{msg}")
-            return True 
+            return 0
         except:
-            return False
+            return 1
     
-    def warning(msg: str) -> bool:
+    def warning(self, msg: str) -> int:
         try: 
             logging.warning(f"{msg}")
-            return True
+            return 0
         except:
-            return False
+            return 1
 
-    def error(msg: str) -> bool:
-        try:
+    def error(self, msg: str) -> int:
+        try: 
             logging.error(f"{msg}")
-            return True
+            return 0
         except:
-            return False
-
-    def critical(msg: str) -> bool:
-        try:
+            return 1
+    
+    def critical(self, msg: str) -> int:
+        try: 
             logging.critical(f"{msg}")
-            return True
+            return 0
         except:
-            return False
+            return 1
+    

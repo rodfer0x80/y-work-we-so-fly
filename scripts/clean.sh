@@ -1,2 +1,2 @@
 #!/bin/sh
-rm -rf ./venv
+rm -rf ./venv ./debug.log
