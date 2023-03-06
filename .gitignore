@@ -1,3 +1,13 @@
+# data
+./data
+data
+./data/details.csv
+data/details.csv
+./data/resume.pdf
+data/resume.pdf
+./data/cover_letter.txt
+data/cover_letter.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
