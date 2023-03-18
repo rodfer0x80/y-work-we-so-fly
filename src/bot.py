@@ -40,7 +40,10 @@ class Bot:
             self.details = json.load(h)
 
     def login(self):
+        url = f"https://linkedin.com/in/{self.details['linkedin_username']}"
+        self.driver.get(url)
         time.sleep(1)
+
         try:
             self.driver.find_element(By.CLASS_NAME,
                                      "sign-in-modal__outlet-btn").click()
@@ -59,19 +62,51 @@ class Bot:
         try:
             self.driver.find_element(By.CLASS_NAME,
                                      "sign-in-form__submit-btn--full-width").click()
+            time.sleep(1)
         except:
             return 4
-        time.sleep(1)
+
+        return 0
+
+    def goToJoblisting(self):
+        for keyword in self.details['keywords']:
+            try:
+                self.driver.get(
+                    "https://www.linkedin.com/jobs/search/?currentJobId=1/")
+                time.sleep(5)
+            except:
+                return 1
+            try:
+                self.driver.find_element(
+                    By.CSS_SELECTOR, "input.jobs-search-box__keyboard-text-input").click()
+                time.sleep(1)
+                self.driver.find_element(
+                    By.CSS_SELECTOR, "input.jobs-search-box__keyboard-text-input").send_keys(keyword)
+            except:
+                return 2
+            try:
+                self.driver.find_element(
+                    By.CSS_SELECTOR, "button.jobs-search-box__submit-button").click()
+                time.sleep(5)
+                self.applyAndGetLinks()
+            except:
+                return 3
+        return 0
+
+    def applyAndGetLinks(self):
         return 0
 
     def test(self):
-        url = "https://linkedin.com/in/rodrigolf080"
-        self.driver.get(url)
         err = self.login()
         if err == 0:
-            self.logger.debug(f"[{error}] Login to LinkedIn successfull")
+            self.logger.debug(f"[{err}] Login to LinkedIn successfull")
         else:
-            self.logger.critical(f"[{error}] Login to LinkedIn failed")
+            self.logger.critical(f"[{err}] Login to LinkedIn failed")
 
-        time.sleep(1)
+        err = self.goToJoblisting()
+        if err == 0:
+            self.logger.debug(f"[{err}] Job applications succesfull")
+        else:
+            self.logger.critical(f"[{err}] Job applications failed")
+
         return 0
