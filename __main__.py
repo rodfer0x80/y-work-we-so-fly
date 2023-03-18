@@ -4,7 +4,7 @@
 import os
 import sys
 
-from lib.bot import *
+from src.bot import *
 
 
 def main():

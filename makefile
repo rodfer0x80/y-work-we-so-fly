@@ -2,9 +2,9 @@
 run:
 	 scripts/run.sh
 
-.PHONY: build
-build:
-	scripts/build.sh
+.PHONY: install
+install:
+	scripts/install_driver.sh
 
 .PHONY: clean
 clean:
