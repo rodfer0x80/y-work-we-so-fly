@@ -13,6 +13,9 @@ class Logger:
                 filename=filename
             )
 
+    def log (self, msg: str) -> int:
+        return self.info(msg)
+
     def debug(self, msg: str) -> int:
         try:
             logging.debug(f"{msg}")
