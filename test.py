@@ -5,6 +5,7 @@ import requests
 import sys
 
 
+
 def findSourceTeamtailor(link: str):
     keyword = "teamtailor"
     page = requests.get(link)

@@ -7,6 +7,8 @@ import requests
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium import webdriver
 
 from .logger import *
@@ -25,8 +27,13 @@ class Bot:
 
         self.sources = ["workable"]
 
+        ## Headless
+        options = FirefoxOptions()
+        options.add_argument("--headless")
+        options.add_argument("window-size=1200x1350")
+
         self.driver = webdriver.Firefox(
-            executable_path=DRIVER_LOCAL)
+            executable_path=DRIVER_LOCAL, options=options)
 
         # self.details = dict()
         with open(DETAILS_LOCAL, 'r') as h:
@@ -62,44 +69,94 @@ class Bot:
 
     def applyTeamtailor(self, link, details, resume_local, cover_letter):
         try:
-            self.driver(link)
-            time.sleep(1)
-            self.driver.find_element(By.XPATH, "//span[contains(text(), 'Apply for this job").click()
+            self.driver.get(link)
             time.sleep(1)
             self.logger.log(f"[!] Started application {link}\n")
         except:
             self.logger.log(f"[x] Failed to load application {link}\n")
             return 1
 
+        # disable cookies
+        try:
+            self.driver.find_element(By.XPATH, "//button[@class='careersite-button w-full' and contains(text(), 'Disable all')]").click()
+            self.logger.log(f"[*] Disabled cookies for application {link}\n")
+        except:
+            self.logger.log(f"[x] Failed to disable cookies for application {link}\n")
+            pass
+
+        try:
+            self.driver.find_element(By.CLASS_NAME, 'truncate').click()
+            time.sleep(1)
+            self.logger.log(f"[*] Loaded form for application {link}\n")
+        except:
+            self.logger.log(f"[x] Failed to load form for application {link}\n")
+            return 1
+
+
         # fill in basic info
         try:
-            self.driver.find_element(By.ID, 'candidate_resume_remote_url').send_keys(resume_local)
-            self.driver.find_element(By.ID, 'candidate_first_name').send_keys(details['firstname'])
-            self.driver.find_element(By.ID, 'candidate_first_name').send_keys(details['lastname'])
+            self.driver.find_element(By.ID, 'candidate_first_name').send_keys(details['first_name'])
+            self.driver.find_element(By.ID, 'candidate_last_name').send_keys(details['last_name'])
             self.driver.find_element(By.ID, 'candidate_email').send_keys(details['email'])
             self.driver.find_element(By.ID, 'candidate_phone').send_keys(details['mobile'])
-            self.logger.log(f"[*] Filled basic detailf for application {link}\n")
+            self.logger.log(f"[*] Filled basic details for application {link}\n")
         except:
             self.logger.log(f"[x] Failed to fill basic details for application {link}\n")
             pass
 
-        # fill resume and cover letter
+        # fill resume
+        try:
+            self.driver.find_element(By.ID, 'candidate_resume_remote_url').send_keys(resume_local)
+            time.sleep(1)
+            self.logger.log(f"[*] Uploaded resume for application {link}\n")
+        except:
+            self.logger.log(f"[x] Failed to upload resume for application {link}\n")
+            pass
+
         try:
             self.driver.find_element(By.ID, 'candidate_job_applications_attributes_0_cover_letter').send_keys(
                 cover_letter)
+            time.sleep(1)
+            cover_letter = self.driver.find_element(By.ID, 'candidate_job_applications_attributes_0_cover_letter')
+            time.sleep(1)
             self.logger.log(f"[*] Filled cover letter for application {link}\n")
         except:
             self.logger.log(f"[x] No cover letter field found for application {link}\n")
             pass
 
+
+        # scroll down
+        try:
+            self.driver.execute_script("arguments[0].scrollIntoView();", cover_letter)
+            self.logger.log(f"[*] Scroll down in application {link}\n")
+        except:
+            self.logger.log(f"[!] Failed to scroll down in application {link}\n")
+            pass
+
         # consent to data storage
         try:
             self.driver.find_element(By.ID, 'candidate_consent_given').click()
+            checkbox = self.driver.find_element(By.ID, 'candidate_consent_given')
             self.logger.log(f"[*] Accepted data storage consent for application {link}\n")
         except:
             self.logger.log(f"[x] Failed to give data storage consent for application {link}\n")
             pass
 
+        # scroll down
+        try:
+            self.driver.execute_script("arguments[0].scrollIntoView();", checkbox)
+            self.logger.log(f"[*] Scroll down in application {link}\n")
+        except:
+            self.logger.log(f"[!] Failed to scroll down in application {link}\n")
+            pass
+
+        # submit application
+        try:
+            self.driver.find_element(By.XPATH, "//input[@type='submit']").click()
+            self.logger.log(f"[+] Completed application {link}\n\n")
+        except:
+            self.logger.log(f"[x] Failed to submit application {link}\n\n")
+            return 1
         return 0
 
 
@@ -171,7 +228,7 @@ class Bot:
             self.logger.log(f"[+] Completed application {link}\n\n")
         except:
             self.logger.log(f"[x] Failed to submit application {link}\n\n")
-            pass
+            return 1
 
         return 0
 

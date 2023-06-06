@@ -4,7 +4,8 @@ import os
 import sys
 
 def main():
-    cmd = "cd .. && rm debug.log; test -e ./venv || python3 -m venv venv &&\
+    cmd = " cd ..; test -e debug.log && rm -f debug.log;\
+            test -e ./venv || python3 -m venv venv &&\
             source ./venv/bin/activate && pip install --upgrade pip &&\
             pip install -r requirements.txt;\
             source ./venv/bin/activate && python ./__main__.py"
