@@ -8,8 +8,17 @@ from src.bot import *
 
 
 def main():
+    #if len(sys.argv) != 2:
+    #    sys.stdoud.write("Usage: {__file__} <batchfile_path>\n")
+    #    return 1
+    #else:
+    #    batchfile = sys.argv[1]
+    batchfile = "./data/preapply.txt"
+
     bot = Bot()
-    bot.test()
+    
+    bot.applyBatch(batchfile)
+    
     return 0
 
 

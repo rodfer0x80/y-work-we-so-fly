@@ -41,7 +41,8 @@ class Bot:
         self.resume_local = f"{os.environ['PWD']}/{RESUME_LOCAL[2:]}"
         with open(COVER_LETTER_LOCAL, 'r') as h:
             self.cover_letter = h.read()
-    def findSourceWorkable(self, link):
+
+   def findSourceWorkable(self, link):
         if "apply.workable.com" in link:
             return True
         return False
@@ -180,7 +181,7 @@ class Bot:
         except:
             self.logger.warning(f"[x] No firstname or lastname field found for application {link}\n")
             pass
-        
+
         # fill in email
         try:
             self.driver.find_element(By.ID, "email").send_keys(details['email'])
@@ -301,9 +302,6 @@ class Bot:
             for link in f.readline():
                 self.applyLink(link, details, resume_local, cover_letter)
         return 0
-
-    def test(self):
-        self.applyLink("https://apply.workable.com/lytt/j/1C144C2AD7/apply/", self.details, self.resume_local, self.cover_letter)
 
     def loginLinkedin(self):
         url = f"https://linkedin.com/in/{self.details['linkedin_username']}"
