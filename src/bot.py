@@ -7,7 +7,6 @@ import requests
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium import webdriver
 
@@ -42,7 +41,7 @@ class Bot:
         with open(COVER_LETTER_LOCAL, 'r') as h:
             self.cover_letter = h.read()
 
-   def findSourceWorkable(self, link):
+    def findSourceWorkable(self, link):
         if "apply.workable.com" in link:
             return True
         return False
@@ -58,6 +57,10 @@ class Bot:
         if source:
             return "teamtailor"
 
+        source = self.findSourceAshby(link)
+        if source:
+            return "ashby"
+
         return source
 
     def findSourceTeamtailor(self, link):
@@ -67,6 +70,59 @@ class Bot:
             if keyword in line:
                 return True
         return False
+
+    def findSourceAshby(self, link):
+        if "jobs.ashbyhq.com" in link:
+            return True
+        return False
+
+    def applyAshby(self, link, details, resume_local, cover_letter):
+        try:
+            self.driver.get(f"{link}/application")
+            self.logger.info(f"[!] Started application {link}\n")
+            time.sleep(3)
+        except:
+            self.logger.error(f"[x] Failed to load application {link}\n")
+            return 1
+
+        try:
+            self.driver.find_element(By.XPATH, "//input[@name='_systemfield_name']").send_keys(f"{details['first_name']} {details['last_name']}")
+            self.logger.info(f"[*] Filled name field for application {link}\n")
+        except:
+            self.logger.warning(f"[x] Fail to fill name field for application {link}\n")
+            pass
+
+        try:
+            self.driver.find_element(By.XPATH, "//input[@name='_systemfield_email']").send_keys(details['email'])
+            self.logger.info(f"[*] Filled email field for application {link}\n")
+        except:
+            self.logger.warning(f"[x] Fail to fill email field for application {link}\n")
+            pass
+
+        try:
+            self.driver.find_element(By.XPATH, "//textarea[@rows='4']").send_keys(cover_letter)
+            self.logger.info(f"[*] Filled cover letter field for application {link}\n")
+        except:
+            self.logger.warning(f"[x] Fail to fill cover letter field for application {link}\n")
+            pass
+
+        try:
+            self.driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[2]/div/div/div[5]/div/input").send_keys(resume_local)
+            self.logger.info(f"[*] Uploaded resume for application {link}\n")
+            time.sleep(3)
+        except:
+            self.logger.warning(f"[x] Failed to upload resume for application {link}\n")
+        pass
+
+        try:
+            self.driver.find_element(By.CLASS_NAME, 'ashby-application-form-submit-button').click()
+            self.logger.info(f"[!] Submited application {link}\n")
+        except:
+            self.logger.error(f"[x] Failed to submit application {link}\n")
+            return 2
+
+        return 0
+
 
     def applyTeamtailor(self, link, details, resume_local, cover_letter):
         try:
@@ -82,7 +138,7 @@ class Bot:
             self.driver.find_element(By.XPATH, "//button[@class='careersite-button w-full' and contains(text(), 'Disable all')]").click()
             self.logger.info(f"[*] Disabled cookies for application {link}\n")
         except:
-            self.logger.error(f"[x] Failed to disable cookies for application {link}\n")
+            self.logger.warning(f"[x] Failed to disable cookies for application {link}\n")
             pass
 
         try:
@@ -90,7 +146,7 @@ class Bot:
             time.sleep(1)
             self.logger.info(f"[*] Loaded form for application {link}\n")
         except:
-            self.logger.error(f"[x] Failed to load form for application {link}\n")
+            self.logger.warning(f"[x] Failed to load form for application {link}\n")
             return 2
 
 
@@ -292,6 +348,8 @@ class Bot:
             self.applyWorkable(link, details, resume_local, cover_letter)
         elif source == "teamtailor":
             self.applyTeamtailor(link, details, resume_local, cover_letter)
+        elif source == "ashby":
+            self.applyAshby(link, details, resume_local, cover_letter)
         else:
             return 1
 
@@ -301,6 +359,10 @@ class Bot:
         with open(batchfile, 'r') as f:
             for link in f.readline():
                 self.applyLink(link, details, resume_local, cover_letter)
+        return 0
+
+    def test(self):
+        self.applyLink("https://jobs.ashbyhq.com/safi/83c5a967-b72d-42ae-9889-86e3bbba6da6", self.details, self.resume_local, self.cover_letter)
         return 0
 
     def loginLinkedin(self):

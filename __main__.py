@@ -17,8 +17,9 @@ def main():
 
     bot = Bot()
     
-    bot.applyBatch(batchfile)
-    
+    #bot.applyBatch(batchfile)
+    bot.test()
+
     return 0
 
 
