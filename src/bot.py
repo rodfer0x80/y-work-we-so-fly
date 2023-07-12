@@ -28,8 +28,8 @@ class Bot:
 
         ## Headless
         options = FirefoxOptions()
-        options.add_argument("--headless")
-        options.add_argument("--window-size=1200x800")
+        #options.add_argument("--headless")
+        options.add_argument("--window-size=1920x1080")
 
         self.driver = webdriver.Firefox(
             executable_path=DRIVER_LOCAL, options=options)
@@ -221,10 +221,14 @@ class Bot:
 
     def applyWorkable(self, link, details, resume_local, cover_letter):
         # go to application section
+        if link[-1] == "/":
+            link = f"{link}apply"
+        else:
+            link = f"{link}/apply"
         try:
-            self.driver.get(f"{link}/apply/")
-            time.sleep(1)
+            self.driver.get(link)
             self.logger.info(f"[!] Started application {link}\n")
+            time.sleep(2)
         except:
             self.logger.error(f"[x] Failed to start application {link}\n")
             return 1
@@ -248,13 +252,23 @@ class Bot:
 
         # fill in mobile
         try:
-            self.driver.find_element(By.CLASS_NAME, "styles--1EuHm").click()
+            self.driver.find_element(By.XPATH, "/html/body/div/div/div/div/main/form/section[1]/div[2]/div[5]/label/div/div/div/div/input").click()
             wait = WebDriverWait(self.driver, 3)
-            mobile = wait.until(EC.visibility_of_element_located((By.XPATH, '/html/body/div/div/div/div/main/form/section[1]/div[2]/div[4]/label/div/div/div/div/input')))
+            mobile = wait.until(EC.visibility_of_element_located((By.XPATH, '/html/body/div/div/div/div/main/form/section[1]/div[2]/div[5]/label/div/div/div/div/input')))
             mobile.send_keys(details['mobile'])
             self.logger.info(f"[*] Filled mobile for application {link}\n")
+            time.sleep(1)
         except:
             self.logger.warning(f"[x] No mobile field found for application {link}\n")
+            pass
+
+        # fill in address
+        try:
+            self.driver.find_element(By.ID, "address").send_keys(details['address'])
+            self.logger.info(f"[*] Filled address for application {link}\n")
+            time.sleep(1)
+        except:
+            self.logger.warning(f"[x] No address field found for application {link}\n")
             pass
 
         # scroll down
@@ -265,6 +279,7 @@ class Bot:
         except:
             self.logger.warning(f"[!] Failed to scroll down in application {link}\n")
             pass
+
         # fill in summary
         try:
             summary = ""
@@ -284,6 +299,7 @@ class Bot:
         except:
             self.logger.warning(f"[!] Failed to scroll down in application {link}\n")
             pass
+
         # upload resume
         try:
             self.driver.find_element(By.XPATH, "//input[contains(@id,'input_files_input')]").send_keys(resume_local)
@@ -324,13 +340,25 @@ class Bot:
             pass
         try:
             self.driver.find_element(By.XPATH,
-                                     "//span[@class='styles--33WZ1' and contains(text(), 'yes')]").click()
+                                     "//span[@class='styles--33WZ1' and contains(text(), 'yes')]")\
+                .click()
             self.logger.info(f"[*] Confirmed right to work for application {link}\n")
         except:
             self.logger.warning(f"[X] Failed to confirm right to work for application {link}\n")
             pass
 
         # submit application
+        time.sleep(1)
+        try:
+            self.driver.find_element(By.XPATH,
+                                     '/html/body/div/div/div/div/main/form/section[4]/div/div/div/label/label/div/input')\
+                .click()
+            self.driver.find_element(By.XPATH,
+                                     '/html/body/div/div/div/div/main/form/section[4]/div/div/div/label/label/div/input')\
+                .send_keys("1")
+            self.logger.info(f"[*] Confirmed GDPR notice for application {link}\n")
+        except:
+            self.logger.warning(f"[X] Failed to confirm GDPR notice for application {link}\n")
         time.sleep(1)
         try:
             self.driver.find_element(By.XPATH, "//button[contains(text(),'Submit application')]").click()
@@ -355,10 +383,10 @@ class Bot:
 
         return 0
 
-    def applyBatch(self, batchfile, details, resume_local, cover_letter):
+    def applyBatch(self, batchfile):
         with open(batchfile, 'r') as f:
-            for link in f.readline():
-                self.applyLink(link, details, resume_local, cover_letter)
+            for link in f.read().splitlines():
+                self.applyLink(link, self.details, self.resume_local, self.cover_letter)
         return 0
 
     def test(self):
